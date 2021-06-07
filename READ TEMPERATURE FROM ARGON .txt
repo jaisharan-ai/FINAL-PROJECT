@@ -1,0 +1,53 @@
+// This #include statement was automatically added by the Particle IDE.
+#include <Adafruit_DHT.h>
+
+// This #include statement was automatically added by the Particle IDE.
+#include <ThingSpeak.h>
+
+#include "ThingSpeak.h"
+
+#define DHTPIN 4
+#define DHTTYPE DHT11
+
+DHT dht(DHTPIN, DHTTYPE);
+
+
+TCPClient client;
+
+unsigned long myChannelNumber = 1406818;
+const char * myReadAPIKey = "ASB4N9AKSICHYV5O";
+
+int led = D7;
+
+void setup() {
+    Serial.begin(9600); 
+	Serial.println("DHTxx test!");
+
+	dht.begin();
+    pinMode(led, OUTPUT);
+    ThingSpeak.begin(client);
+}
+
+void loop() {
+    float value = ThingSpeak.readFloatField(myChannelNumber, 1, myReadAPIKey);
+    Particle.publish("thingspeak-value", "Latest value is: " + String(value),60,PRIVATE);
+    if(value==1)
+    {
+	digitalWrite(led, HIGH); 
+    float temperature = dht.getTempCelcius();
+    if (isnan(temperature)) {
+		Serial.println("Failed to read from DHT sensor!");
+		return;
+		}
+		Serial.print(temperature);
+	Particle.publish("temperature read",String(temperature));
+    digitalWrite(led, LOW);
+    delay(300s); 
+    }
+    
+
+}
+
+
+
+
